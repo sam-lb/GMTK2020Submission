@@ -19,9 +19,9 @@ function generateBackground(nStars=2000, nPlanets=5) {
 	}
 }
 
-function generateEnemyShips(n=10) {
-	for (let i=0; i<n; i++) {
-		enemyShips.push(new EnemyShip(createVector(3, 2), 0.5));
+function generateEnemyShips() {
+	for (let pos of enemyPositions) {
+		enemyShips.push(new PatrollerShip(createVector(pos[0], pos[1]), createVector(pos[2], pos[3]), 0.5));
 	}
 }
 
@@ -54,7 +54,7 @@ function setup() {
 	objs = [];
 	enemyShips = []
 	generateBackground();
-	generateEnemyShips(1);
+	generateEnemyShips();
 }
 
 function draw() {

@@ -45,6 +45,26 @@ class WindowHandler {
 		}
 		endShape();
 	}
+	
+	static drawSpikey(p, w, h, color, spikes=3) {
+		let pts = [], spikeSize = w / 3, y = p.y - h/2;
+		pts.push(createVector(p.x, p.y - h/2));
+		pts.push(createVector(p.x, p.y + h/2));
+		pts.push(createVector(p.x - w + spikeSize, y));
+		pts.push(createVector(p.x - w + spikeSize, p.y + h/2));
+		
+		for (let i=1; i<=spikes; i++) {
+			pts.push(createVector(p.x - random(w, w-spikeSize), y + i*h/(spikes+1)));
+		}
+		WindowHandler.drawPolygon(pts, color, color);
+	}
+	
+	static drawFire(p, w, h) {
+		let tw = w/3, th = h/3;
+		WindowHandler.drawSpikey(p, w, h, createVector(255, 255, 0), 5);
+		WindowHandler.drawSpikey(p, 2*tw, 2*th, createVector(255, 128, 0), 5);
+		WindowHandler.drawSpikey(p, tw, th, createVector(255, 0, 0), 5);
+	}
 
 	static polygonMidpoint(points) {
 		let v = createVector(0,0,0);

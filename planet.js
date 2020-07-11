@@ -38,26 +38,6 @@ class Planet {
 		WindowHandler.drawCircle(a, crater.radius, this.darkestColor, this.lighterColor);
 	}
 	
-	drawSpikey(p, w, h, color, spikes=3) {
-		let pts = [], spikeSize = w / 3, y = p.y - h/2;
-		pts.push(createVector(p.x, p.y - h/2));
-		pts.push(createVector(p.x, p.y + h/2));
-		pts.push(createVector(p.x - w + spikeSize, y));
-		pts.push(createVector(p.x - w + spikeSize, p.y + h/2));
-		
-		for (let i=1; i<=spikes; i++) {
-			pts.push(createVector(p.x - random(w, w-spikeSize), y + i*h/(spikes+1)));
-		}
-		WindowHandler.drawPolygon(pts, color, color);
-	}
-	
-	drawFire(p, w, h) {
-		let tw = w/3, th = h/3;
-		this.drawSpikey(p, w, h, createVector(255, 255, 0), 5);
-		this.drawSpikey(p, 2*tw, 2*th, createVector(255, 128, 0), 5);
-		this.drawSpikey(p, tw, th, createVector(255, 0, 0), 5);
-	}
-	
 	move(vec) {
 		this.pos.add(vec);
 	}
@@ -161,13 +141,12 @@ class Moon extends Planet {
 		WindowHandler.drawRect(createVector(this.pos.x, rightGunY-2*fthR), 2*fthR, fthR/2, this.darkerColor, this.darkerColor);
 		
 		if (thrustersOn[0]) {
-			this.drawFire(createVector(thrusterX, this.pos.y+this.radius/2), fthR, fthR);
+			WindowHandler.drawFire(createVector(thrusterX, this.pos.y+this.radius/2), fthR, fthR);
 		}
 		if (thrustersOn[1]) {
-			this.drawFire(createVector(thrusterX, this.pos.y-this.radius/2), fthR, fthR);
+			WindowHandler.drawFire(createVector(thrusterX, this.pos.y-this.radius/2), fthR, fthR);
 		}
 		
-		//this.selfRotate(this.angle);
 		let bullet;
 		for (let i=0; i<this.bullets.length; i++) {
 			bullet = this.bullets[i];
