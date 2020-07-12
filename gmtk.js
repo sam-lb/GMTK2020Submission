@@ -1,5 +1,6 @@
 let HALF_WIDTH, HALF_HEIGHT, SCALE, dims;
-let moon, objs, xUnits, yUnits, enemyShips;
+let moon, objs, xUnits, yUnits, enemyShips, playerEarth, enemyEarth, mode;
+let startBG;
 
 
 function randomColor() {
@@ -20,9 +21,7 @@ function generateBackground(nStars=2000, nPlanets=5) {
 }
 
 function generateEnemyShips() {
-	for (let pos of enemyPositions) {
-		enemyShips.push(new PatrollerShip(createVector(pos[0], pos[1]), createVector(pos[2], pos[3]), 0.5));
-	}
+	//enemyShips.push(new PatrollerShip(createVector(windowDims.), createVector(), 0.5, moon));
 }
 
 function keyPressed() {
@@ -37,6 +36,26 @@ function keyReleased() {
 	}
 }
 
+function initializeSpace() {
+	mode = "moon";
+	moon = new Moon(createVector(0, 0), 1);
+	playerEarth = new Earth(createVector(totalDims.xmin + 10, totalDims.ymin + 10), 5);
+	enemyEarth = new Earth(createVector(totalDims.xmax - 10, totalDims.ymax - 10), 5);
+	objs = [];
+	enemyShips = []
+	generateBackground(2000,5);
+	//generateEnemyShips();
+}
+
+function startScreen() {
+	image(startBG, 0, 0);
+	initializeSpace();
+}
+
+function preload() {
+	startBG = loadImage();
+	controlRoomBG1 = loadImage("https://raw.githubusercontent.com/sam-lb/GMTK2020Submission/master/reimages/Background.png");
+}
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
@@ -49,23 +68,24 @@ function setup() {
 	xUnits = windowDims["xmax"] - windowDims["xmin"];
 	yUnits = windowDims["ymax"] - windowDims["ymin"];
 	totalDims = {"xmin": prop * windowDims.xmin, "xmax": prop * windowDims.xmax, "ymin": prop * windowDims.ymin, "ymax": prop * windowDims.ymax,};
+	mode = "start";
 	
-	moon = new Moon(createVector(0, 0), 1);
-	objs = [];
-	enemyShips = []
-	generateBackground();
-	generateEnemyShips();
+	startBG.resize(windowWidth, windowHeight);
 }
 
 function draw() {
-	background(0);
-	for (let obj of objs) {
-		obj.draw();
+	if (mode === "start") {
+		startScreen();
+	} else if (mode === "moon") {
+		background(0, 6, 23);
+		for (let obj of objs) {
+			obj.draw();
+		}
+		for (let enemyShip of enemyShips) {
+			enemyShip.draw();
+		}
+		playerEarth.draw();
+		enemyEarth.draw();
+		moon.draw();
 	}
-	for (let enemyShip of enemyShips) {
-		enemyShip.draw();
-	}
-	
-	WindowHandler.drawLine(createVector(totalDims.xmin, totalDims.ymax), createVector(totalDims.xmax, totalDims.ymax), createVector(255, 0, 0), 3);
-	moon.draw();
 }

@@ -15,6 +15,14 @@ class WindowHandler {
 		p = WindowHandler.transformCoordinates(p);
 		circle(p.x, p.y, 2 * r * SCALE);
 	}
+	
+	static drawCircleOutline(p, r, color, weight=1) {
+		strokeWeight(weight);
+		stroke(color.x, color.y, color.z);
+		noFill();
+		p = WindowHandler.transformCoordinates(p);
+		circle(p.x, p.y, 2 * r * SCALE);
+	}
 
 	static drawLine(p1, p2, color, weight=1) {
 		stroke(color.x, color.y, color.z);

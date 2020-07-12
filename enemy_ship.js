@@ -5,10 +5,11 @@ class EnemyShip {
 		this.radius = r;
 		this.miniR = this.radius * 0.8;
 		this.bigR = this.radius * 1.2;
-		this.baseColor = createVector(100, 50, 50);
+		this.baseColor = createVector(100, 100, 100);
 		this.antiColor = createVector(255, 255, 255);
-		this.darkerColor = createVector(255, 0, 0);
+		this.darkerColor = createVector(0, 255, 0);
 		this.bulletColor = createVector(255, 128, 0);
+		this.activated = false;
 		this.bullets = [];
 		this.angle = 0;
 	}
@@ -21,8 +22,10 @@ class EnemyShip {
 	}
 	
 	shoot() {
-		this.bullets.push(new Bullet(this.gunPoints[0], this.rotationVector, this.bulletColor));
-		this.bullets.push(new Bullet(this.gunPoints[1], this.rotationVector, this.bulletColor));
+		if (this.activated) {
+			this.bullets.push(new Bullet(this.gunPoints[0], this.rotationVector, this.bulletColor));
+			this.bullets.push(new Bullet(this.gunPoints[1], this.rotationVector, this.bulletColor));
+		}
 	}
 	
 	move() {
@@ -68,12 +71,14 @@ class EnemyShip {
 
 class PatrollerShip extends EnemyShip {
 	
-	constructor(point1, point2, r) {
+	constructor(point1, point2, r, goal) {
 		super(point1.copy(), r);
 		this.points = [point1, point2];
-		this.speed = 0.1;
+		this.outerR = this.radius * 15;
+		this.speed = 0.05;
 		this.vel = p5.Vector.sub(point2, point1).setMag(this.speed);
 		this.target = 1;
+		this.goal = goal;
 		this.findAngle();
 	}
 	
@@ -82,19 +87,40 @@ class PatrollerShip extends EnemyShip {
 	}
 	
 	move() {
-		let target = this.points[this.target];
-		if (dist(this.pos.x, this.pos.y, target.x, target.y) <= this.speed) {
-			this.vel.mult(-1);
-			this.target = (this.target + 1) % 2;
+		if (this.activated) {
+			let diff = p5.Vector.sub(this.goal.pos, this.pos);
+			this.angle = (atan2(diff.y, diff.x)+9*this.angle)/10;
+			this.pos.add(diff.setMag(this.speed));
+			if (random() < 0.03) {
+				this.shoot();
+			}	
+		} else {
+			let target = this.points[this.target];
+			this.vel = p5.Vector.sub(target, this.pos).setMag(this.speed);
+			if (dist(this.pos.x, this.pos.y, target.x, target.y) <= this.speed) {
+				this.target = (this.target + 1) % 2;
+			}
 			this.findAngle();
+			this.pos.add(this.vel);
 		}
-		this.pos.add(this.vel);
 		return {"moving": true,};
 	}
 	
 	draw() {
-		if (WindowHandler.onScreen(this.pos, this.radius*3)) {
+		if (WindowHandler.onScreen(this.pos, this.outerR)) {
+			let d = dist(this.goal.pos.x, this.goal.pos.y, this.pos.x, this.pos.y);
+			if (d < this.goal.radius + this.outerR) {
+				if (d < this.goal.radius + this.radius) {
+					// ENTER INSIDE MOON MODE
+				}
+				this.activated = true;
+				this.darkerColor = createVector(255, 0, 0);
+			} else {
+				this.activated = false;
+				this.darkerColor = createVector(0, 255, 0);
+			}
 			super.draw();
+			WindowHandler.drawCircleOutline(this.pos, this.outerR, this.baseColor);
 		}
 	}
 	

@@ -5,7 +5,7 @@ function constrainVector(v, low, high) {
 
 class Planet {
 	
-	constructor(pos, radius, baseColor=createVector(220, 220, 220), isStatic=false) {
+	constructor(pos, radius, baseColor=createVector(220, 220, 220), isStatic=false, nCraters=10) {
 		this.pos = pos;
 		this.radius = radius;
 		this.baseColor = baseColor;
@@ -13,7 +13,7 @@ class Planet {
 		this.darkerColor = p5.Vector.mult(this.baseColor, 0.5);
 		this.darkestColor = p5.Vector.mult(this.baseColor, 0.3);
 		this.craters = [];
-		this.generateProperties();
+		this.generateProperties(nCraters);
 		this.angle = 0;
 		this.isStatic = isStatic;
 	}
@@ -81,8 +81,49 @@ class Planet {
 			}
 			pop();
 		}
-	}	
+	}
 }
+
+
+
+class Earth extends Planet {
+	
+	constructor(pos, radius) {
+		super(pos, radius, createVector(0, 0, 255), true, 0);
+		this.continentColor = createVector(0, 200, 0);
+		this.continent = [this.randomPolygon(), this.randomPolygon(), this.randomPolygon()];
+	}
+	
+	randomPoint() {
+		return p5.Vector.fromAngle(random(TWO_PI)).mult(random(this.radius)).add(this.pos);
+	}
+	
+	randomEdgePoint() {
+		return p5.Vector.fromAngle(random(TWO_PI)).mult(this.radius).add(this.pos);
+	}
+	
+	randomPolygon() {
+		let edge = [];
+		for (let i=0; i<5; i++) {
+			edge.push(this.randomEdgePoint());
+		}
+		return WindowHandler.sortClockwise(edge.concat([this.randomPoint(), this.randomPoint()]));
+	}
+	
+	drawExtras() {
+		for (let poly of this.continent) {
+			WindowHandler.drawPolygon(poly, this.continentColor, this.continentColor);
+			WindowHandler.drawPolygon(poly, this.continentColor, this.continentColor);
+		}
+	}
+	
+	draw() {
+		super.draw();
+		this.drawExtras();
+	}
+	
+}
+
 
 
 class Moon extends Planet {
