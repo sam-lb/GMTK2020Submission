@@ -118,7 +118,7 @@ class PatrollerShip extends EnemyShip {
 			let d = dist(this.goal.pos.x, this.goal.pos.y, this.pos.x, this.pos.y);
 			if (d < this.goal.radius + this.outerR) {
 				if (d < this.goal.radius + this.radius) {
-					// ENTER INSIDE MOON MODE
+					initializeInside();
 				}
 				this.activated = true;
 				this.darkerColor = createVector(255, 0, 0);
@@ -146,6 +146,9 @@ class Pursuer extends EnemyShip {
 	
 	move() {
 		let diff = p5.Vector.sub(this.goal.pos, this.pos);
+		if (diff.mag() < this.goal.radius + this.radius) {
+			initializeInside();
+		}
 		if (random() < 0.03) {
 				this.shoot();
 		}
@@ -163,7 +166,7 @@ class EarthAttacker extends EnemyShip {
 		this.goal = p5.Vector.fromAngle(random(PI/3, 2*PI/3)).mult(playerEarth.radius+5).add(playerEarth.pos);
 		this.speed = 0.2;
 		this.darkerColor = createVector(153, 51, 255);
-		this.bulletDamage = 2;
+		this.bulletDamage = 3;
 	}
 	
 	move() {

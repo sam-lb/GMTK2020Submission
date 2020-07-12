@@ -223,6 +223,10 @@ class Moon extends Planet {
 		WindowHandler.drawRect(this.healthBarPos, this.radius * 2, 0.25, createVector(255, 0, 0), createVector(255, 0, 0));
 		WindowHandler.drawRect(this.healthBarPos, (this.health/50) * (this.radius * 2), 0.25, createVector(0, 255, 0), createVector(0, 255, 0));
 		this.selfRotate(-this.angle);
+		
+		if (this.health <= 0) {
+			initializeInside();
+		}
 	}
 	
 }
