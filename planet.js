@@ -88,10 +88,12 @@ class Planet {
 
 class Earth extends Planet {
 	
-	constructor(pos, radius) {
-		super(pos, radius, createVector(0, 0, 255), true, 0);
-		this.continentColor = createVector(0, 200, 0);
+	constructor(pos, radius, color=createVector(0, 0, 255), continentColor=createVector(0, 200, 0)) {
+		super(pos, radius, color, true, 0);
+		this.continentColor = continentColor;
 		this.continent = [this.randomPolygon(), this.randomPolygon(), this.randomPolygon()];
+		this.health = 100;
+		this.healthBarPos = createVector(this.pos.x - this.radius, this.pos.y - this.radius);
 	}
 	
 	randomPoint() {
@@ -115,6 +117,8 @@ class Earth extends Planet {
 			WindowHandler.drawPolygon(poly, this.continentColor, this.continentColor);
 			WindowHandler.drawPolygon(poly, this.continentColor, this.continentColor);
 		}
+		WindowHandler.drawRect(this.healthBarPos, this.radius * 2, 0.5, createVector(255, 0, 0), createVector(255, 0, 0));
+		WindowHandler.drawRect(this.healthBarPos, (this.health/100) * (this.radius * 2), 0.5, createVector(0, 255, 0), createVector(0, 255, 0));
 	}
 	
 	draw() {
@@ -128,14 +132,20 @@ class Earth extends Planet {
 
 class Moon extends Planet {
 	
-	constructor(pos, radius, baseColor=createVector(220, 220, 220)) {
+	constructor(pos, radius, baseColor=createVector(220, 220, 220), bulletDamage=1) {
 		super(pos, radius, baseColor, false);
 		this.bulletColor = createVector(0, 255, 255);
 		this.bullets = [];
 		this.canShoot = true;
+		this.speed = 0;
+		this.dead = false;
+		this.health = 50;
+		this.bulletDamage = bulletDamage;
 	}
 	
 	handleKeys() {
+		this.speed = this.speed * 0.98;
+		
 		let leftThrusterOn = false, rightThrusterOn = false;
 		if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
 			this.rotate(PI/40);
@@ -146,9 +156,16 @@ class Moon extends Planet {
 			leftThrusterOn = true;
 		}
 		if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
-			this.move(p5.Vector.mult(this.rotationVector, 0.2));
+			this.speed = constrain(this.speed / 0.9, 0.01, 0.2);
 			rightThrusterOn = true;
 			leftThrusterOn = true;
+		}
+		let d = dist(this.pos.x, this.pos.y, enemyEarth.pos.x, enemyEarth.pos.y)
+		if (d > this.radius + enemyEarth.radius) {
+			this.move(p5.Vector.mult(this.rotationVector, this.speed));
+		} else {
+			this.move(p5.Vector.sub(enemyEarth.pos, this.pos).setMag(-0.1));
+			this.speed = 0;
 		}
 		WindowHandler.cameraTrack(this);
 		this.pos.x = constrain(this.pos.x, totalDims.xmin+this.radius+0.1, totalDims.xmax-this.radius-0.1);
@@ -188,17 +205,20 @@ class Moon extends Planet {
 			WindowHandler.drawFire(createVector(thrusterX, this.pos.y-this.radius/2), fthR, fthR);
 		}
 		
+		this.selfRotate(this.angle);
 		let bullet;
 		for (let i=0; i<this.bullets.length; i++) {
 			bullet = this.bullets[i];
-			this.selfRotate(this.angle);
 			bullet.draw();
-			this.selfRotate(-this.angle);
 			if (!WindowHandler.onScreen(bullet.pos, bullet.l)) {
 				this.bullets.splice(i,1);
 				i--;
 			}
 		}
+		this.healthBarPos = createVector(this.pos.x - this.radius, this.pos.y - this.radius * 1.5);
+		WindowHandler.drawRect(this.healthBarPos, this.radius * 2, 0.25, createVector(255, 0, 0), createVector(255, 0, 0));
+		WindowHandler.drawRect(this.healthBarPos, (this.health/50) * (this.radius * 2), 0.25, createVector(0, 255, 0), createVector(0, 255, 0));
+		this.selfRotate(-this.angle);
 	}
 	
 }

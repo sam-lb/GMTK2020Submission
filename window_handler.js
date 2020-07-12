@@ -5,7 +5,7 @@ class WindowHandler {
 	}
 
 	static reverseTransform(p) {
-		return createVector((p.x - HALF_WIDTH) / SCALE, (HALF_WIDTH - p.y) / SCALE)
+		return createVector((p.x - HALF_WIDTH) / SCALE + windowDims.midx, (HALF_HEIGHT - p.y) / SCALE + windowDims.midy)
 	}
 	
 	static drawCircle(p, r, color, strokeColor, transparency=255) {

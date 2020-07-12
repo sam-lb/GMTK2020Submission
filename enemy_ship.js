@@ -1,6 +1,6 @@
 class EnemyShip {
 	
-	constructor(pos, r) {
+	constructor(pos, r, bulletDamage=5) {
 		this.pos = pos;
 		this.radius = r;
 		this.miniR = this.radius * 0.8;
@@ -12,6 +12,10 @@ class EnemyShip {
 		this.activated = false;
 		this.bullets = [];
 		this.angle = 0;
+		this.bulletDamage = bulletDamage;
+		this.maxHealth = 35;
+		this.health = this.maxHealth;
+		this.dead = false;
 	}
 	
 	selfRotate(angle) {
@@ -65,6 +69,9 @@ class EnemyShip {
 				i--;
 			}
 		}
+		this.healthBarPos = createVector(this.pos.x - this.radius, this.pos.y - this.radius * 1.5);
+		WindowHandler.drawRect(this.healthBarPos, this.radius * 2, 0.25, createVector(255, 0, 0), createVector(255, 0, 0));
+		WindowHandler.drawRect(this.healthBarPos, (this.health/this.maxHealth) * (this.radius * 2), 0.25, createVector(0, 255, 0), createVector(0, 255, 0));
 	}
 }
 
@@ -128,6 +135,20 @@ class PatrollerShip extends EnemyShip {
 
 
 class Pursuer extends EnemyShip {
+	
+	constructor(pos, r, goal) {
+		super(pos, r, 1);
+		this.goal = goal;
+	}
+	
+	move() {
+		let diff = p5.Vector.sub(this.goal.pos, this.pos);
+		this.angle = (atan2(diff.y, diff.x)+9*this.angle)/10;
+		this.pos.add(diff.setMag(this.speed));
+		if (random() < 0.03) {
+			this.shoot();
+		}	
+	}
 	
 }
 
