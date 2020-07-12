@@ -77,8 +77,8 @@ function initializeInstructions() {
 function initializeSpace() {
 	mode = "moon";
 	moon = new Moon(createVector(totalDims.xmin + 16, totalDims.ymin + 16), 1);
-	playerEarth = new Earth(createVector(totalDims.xmin + 10, totalDims.ymin + 10), 5, ()=>{});
-	enemyEarth = new Earth(createVector(totalDims.xmax - 10, totalDims.ymax - 10), 5, ()=>{}, createVector(0, 0, 0), createVector(200, 0, 0));
+	playerEarth = new Earth(createVector(totalDims.xmin + 10, totalDims.ymin + 10), 5, ()=>{}) // callback; lose game
+	enemyEarth = new Earth(createVector(totalDims.xmax - 10, totalDims.ymax - 10), 5, ()=>{}, createVector(0, 0, 0), createVector(200, 0, 0)); // callback: win game
 	objs = [];
 	enemyShips = []
 	generateBackground();

@@ -123,6 +123,9 @@ class Earth extends Planet {
 	}
 	
 	draw() {
+		if (this.health <= 0) {
+			this.callback();
+		}
 		super.draw();
 		this.drawExtras();
 	}
