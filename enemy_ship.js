@@ -13,7 +13,7 @@ class EnemyShip {
 		this.bullets = [];
 		this.angle = 0;
 		this.bulletDamage = bulletDamage;
-		this.maxHealth = 35;
+		this.maxHealth = 10;
 		this.health = this.maxHealth;
 		this.dead = false;
 	}
@@ -81,7 +81,7 @@ class PatrollerShip extends EnemyShip {
 	constructor(point1, point2, r, goal) {
 		super(point1.copy(), r);
 		this.points = [point1, point2];
-		this.outerR = this.radius * 15;
+		this.outerR = 15;
 		this.speed = 0.05;
 		this.vel = p5.Vector.sub(point2, point1).setMag(this.speed);
 		this.target = 1;
@@ -97,7 +97,7 @@ class PatrollerShip extends EnemyShip {
 		if (this.activated) {
 			let diff = p5.Vector.sub(this.goal.pos, this.pos);
 			this.angle = (atan2(diff.y, diff.x)+9*this.angle)/10;
-			this.pos.add(diff.setMag(this.speed));
+			this.pos.add(diff.setMag(this.speed/2));
 			if (random() < 0.03) {
 				this.shoot();
 			}	
@@ -139,20 +139,50 @@ class Pursuer extends EnemyShip {
 	constructor(pos, r, goal) {
 		super(pos, r, 1);
 		this.goal = goal;
+		this.speed = 0.05;
+		this.darkerColor = createVector(255, 128, 0);
+		this.activated = true;
 	}
 	
 	move() {
 		let diff = p5.Vector.sub(this.goal.pos, this.pos);
+		if (random() < 0.03) {
+				this.shoot();
+		}
 		this.angle = (atan2(diff.y, diff.x)+9*this.angle)/10;
 		this.pos.add(diff.setMag(this.speed));
-		if (random() < 0.03) {
-			this.shoot();
-		}	
+		return {"moving": true,};
 	}
-	
 }
 
 
 class EarthAttacker extends EnemyShip {
+	
+	constructor(pos, r) {
+		super(pos, r, 1);
+		this.goal = p5.Vector.fromAngle(random(PI/3, 2*PI/3)).mult(playerEarth.radius+5).add(playerEarth.pos);
+		this.speed = 0.2;
+		this.darkerColor = createVector(153, 51, 255);
+		this.bulletDamage = 2;
+	}
+	
+	move() {
+		let diff = p5.Vector.sub(this.goal, this.pos);
+		this.activated = diff.mag() < this.speed * 5; // margin of error
+		if (this.activated) {
+			this.angle = atan2(playerEarth.pos.y-this.pos.y, playerEarth.pos.x-this.pos.x);
+			if (random() < 0.05) {
+				this.shoot();
+			}
+			this.textPosition = WindowHandler.transformCoordinates(createVector(windowDims.xmin+1, windowDims.ymax-1));
+			stroke(255);
+			fill(255);
+			text("Aliens have engaged the Earth!", this.textPosition.x, this.textPosition.y);
+		} else {
+			this.angle = (atan2(diff.y, diff.x)+9*this.angle)/10;
+			this.pos.add(diff.setMag(this.speed));
+		}
+		return {"moving": this.activated,};
+	}
 	
 }

@@ -88,8 +88,9 @@ class Planet {
 
 class Earth extends Planet {
 	
-	constructor(pos, radius, color=createVector(0, 0, 255), continentColor=createVector(0, 200, 0)) {
+	constructor(pos, radius, callback, color=createVector(0, 0, 255), continentColor=createVector(0, 200, 0)) {
 		super(pos, radius, color, true, 0);
+		this.callback = callback;
 		this.continentColor = continentColor;
 		this.continent = [this.randomPolygon(), this.randomPolygon(), this.randomPolygon()];
 		this.health = 100;

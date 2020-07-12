@@ -9,7 +9,7 @@ class Button {
 		this.hoverColor = hoverColor;
 		this.callback = callback;
 		
-		textSize(SCALE/2);
+		textSize(SCALE);
 		let tw = textWidth(this.str);
 		let th = textAscent();
 		let c = WindowHandler.transformCoordinates(this.pos);

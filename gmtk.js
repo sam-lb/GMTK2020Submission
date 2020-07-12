@@ -23,13 +23,18 @@ function generateBackground(nStars=2000, nPlanets=5) {
 
 function generateEnemyShips() {
 	enemyShips.push(new PatrollerShip(createVector(totalDims.xmax - 10 - 2*enemyEarth.radius, totalDims.ymax - 5),
-									  createVector(totalDims.xmax - 10 - 2*enemyEarth.radius, totalDims.ymax - 5 - 2*enemyEarth.radius), 0.5, moon));
+									  createVector(totalDims.xmax - 10 - 2*enemyEarth.radius, totalDims.ymax - 5 - 2*enemyEarth.radius), 1, moon));
 	enemyShips.push(new PatrollerShip(createVector(totalDims.xmax - 2.5, totalDims.ymax - 5 - 2*enemyEarth.radius),
-									  createVector(totalDims.xmax - 2.5, totalDims.ymax - 5), 0.5, moon));
+									  createVector(totalDims.xmax - 2.5, totalDims.ymax - 5), 1, moon));
 	enemyShips.push(new PatrollerShip(createVector(totalDims.xmax - 2*enemyEarth.radius - 5, totalDims.ymax - 10 - 2*enemyEarth.radius),
-									  createVector(totalDims.xmax - 5, totalDims.ymax - 10 - 2*enemyEarth.radius), 0.5, moon));
+									  createVector(totalDims.xmax - 5, totalDims.ymax - 10 - 2*enemyEarth.radius), 1, moon));
 	enemyShips.push(new PatrollerShip(createVector(totalDims.xmax - 5, totalDims.ymax - 2.5),
-									  createVector(totalDims.xmax - 2*enemyEarth.radius - 5, totalDims.ymax - 2.5), 0.5, moon));
+									  createVector(totalDims.xmax - 2*enemyEarth.radius - 5, totalDims.ymax - 2.5), 1, moon));
+	enemyShips.push(new Pursuer(createVector(0, enemyEarth.pos.y), 1, moon));
+	enemyShips.push(new Pursuer(createVector(enemyEarth.pos.x, 0), 1, moon));
+	enemyShips.push(new Pursuer(createVector(0, playerEarth.pos.y), 1, moon));
+	enemyShips.push(new Pursuer(createVector(playerEarth.pos.x, 0), 1, moon));
+	enemyShips.push(new EarthAttacker(enemyEarth.pos.copy(), 1, moon));
 }
 
 function keyPressed() {
@@ -71,13 +76,14 @@ function initializeInstructions() {
 
 function initializeSpace() {
 	mode = "moon";
-	moon = new Moon(createVector(0, 0), 1);
-	playerEarth = new Earth(createVector(totalDims.xmin + 10, totalDims.ymin + 10), 5);
-	enemyEarth = new Earth(createVector(totalDims.xmax - 10, totalDims.ymax - 10), 5, createVector(0, 0, 0), createVector(200, 0, 0));
+	moon = new Moon(createVector(totalDims.xmin + 16, totalDims.ymin + 16), 1);
+	playerEarth = new Earth(createVector(totalDims.xmin + 10, totalDims.ymin + 10), 5, ()=>{});
+	enemyEarth = new Earth(createVector(totalDims.xmax - 10, totalDims.ymax - 10), 5, ()=>{}, createVector(0, 0, 0), createVector(200, 0, 0));
 	objs = [];
 	enemyShips = []
-	generateBackground(2000,5);
+	generateBackground();
 	generateEnemyShips();
+	WindowHandler.cameraTrack(moon);
 }
 
 function startScreen() {
@@ -96,12 +102,12 @@ function moonScreen() {
 	for (let obj of objs) {
 		obj.draw();
 	}
+	playerEarth.draw();
+	enemyEarth.draw();
 	for (let enemyShip of enemyShips) {
 		enemyShip.draw();
 	}
 	bulletHandling();
-	playerEarth.draw();
-	enemyEarth.draw();
 	moon.draw();
 }
 
@@ -116,6 +122,35 @@ function bulletHandling() {
 			i--;
 			continue;
 		}
+		for (let j=0; j<enemyShips.length; j++) {
+			if (dist(bullet.pos.x, bullet.pos.y, enemyShips[j].pos.x, enemyShips[j].pos.y) < enemyShips[j].radius) {
+				moon.bullets.splice(i,1);
+				enemyShips[j].health -= moon.bulletDamage;
+				i--;
+				if (enemyShips[j].health <= 0) {
+					enemyShips.splice(j, 1);
+				}
+				break;
+			}
+		}
+	}
+	
+	let ship;
+	for (let i=0; i<enemyShips.length; i++) {
+		ship = enemyShips[i];
+		for (let j=0; j<ship.bullets.length; j++) {
+			bullet = ship.bullets[j];
+			if (dist(bullet.pos.x, bullet.pos.y, playerEarth.pos.x, playerEarth.pos.y) < playerEarth.radius) {
+				ship.bullets.splice(j,1);
+				playerEarth.health -= ship.bulletDamage;
+				j--;
+				continue;
+			} else if (dist(bullet.pos.x, bullet.pos.y, moon.pos.x, moon.pos.y) < moon.radius) {
+				ship.bullets.splice(j, 1);
+				moon.health -= ship.bulletDamage;
+				j--;
+			}
+		}
 	}
 }
 
@@ -129,7 +164,7 @@ function setup() {
 	createCanvas(windowWidth, windowHeight);
 	HALF_WIDTH = windowWidth / 2;
 	HALF_HEIGHT = windowHeight / 2;
-	let windowUnits = 10, totalUnits = 100; // change to 15 and change patrol enemy radius
+	let windowUnits = 15, totalUnits = 100; // change to 15 and change patrol enemy radius
 	let prop = totalUnits / windowUnits;
 	SCALE = min(windowWidth, windowHeight) / windowUnits;
 	windowDims = {"xmin": -HALF_WIDTH / SCALE, "xmax": HALF_WIDTH / SCALE, "ymin": -HALF_HEIGHT / SCALE, "ymax": HALF_HEIGHT / SCALE, midx: 0, midy: 0,};
